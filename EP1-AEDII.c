@@ -18,6 +18,51 @@ typedef struct {
 	int numArestas;	
 } Grafo;
 
+Aresta* selectArestaComAnterior(int v1, int v2, Aresta *anterior, Grafo* grafo){
+	if(grafo == NULL){
+		printf("SelectComAnterior: Deu ruim ao tentar para (%d,%d)\n", v1, v2);
+		printf("Seu grafo foi inicializado?\n");
+		return NULL;
+	}
+
+	Aresta *tmp = grafo->listaAdj[v1];
+	
+	Aresta *tmp2;
+	
+	while(!(tmp == NULL)){	
+		if(tmp->verticeDeDestino == v2){
+
+			//printf("SelectComAnterior: Retornando (%d,%d) \n", v1, v2);
+			//printf("SelectComAnterior: Setando 'anterior'");
+			anterior = tmp2;
+			return tmp;
+		}
+		tmp2 = tmp;
+		tmp = tmp->prox;
+	}
+	//printf("SelectComAnterior: (%d,%d) não existe\n", v1, v2);
+	return NULL;
+}
+
+Aresta* selectAresta(int v1, int v2, Grafo* grafo){
+	if(grafo == NULL){
+		printf("Select: Deu ruim ao tentar para (%d,%d)\n", v1, v2);
+		printf("Seu grafo foi inicializado?\n");
+		return NULL;
+	}
+	
+	Aresta *tmp = grafo->listaAdj[v1];
+		
+	while(!(tmp == NULL)){
+		if(tmp->verticeDeDestino == v2){
+			//printf("Select: Retornando (%d,%d) \n", v1, v2);
+			return tmp;
+		}
+		tmp = tmp->prox;
+	}
+	//printf("Select: (%d,%d) não existe\n", v1, v2);
+	return NULL;
+}
 
 bool inicializaGrafo(Grafo *grafo, int nV){
 	grafo->listaAdj = (Apontador*) malloc(sizeof(Apontador) * nV);
@@ -44,23 +89,19 @@ bool inicializaGrafo(Grafo *grafo, int nV){
 	return 1;
 }
 
-// Para debuggin
-void imprimeGrafo(Grafo* grafo, int nV){
+void imprimeGrafo(Grafo* grafo){
+	printf("%d %d\n", grafo->numVertices, grafo->numArestas);
 	int i;
-	for(i=0; i<=nV; i++){
-		Aresta *tmp = grafo->listaAdj[i];
-		
-		while(!(tmp == NULL)){
-			if(tmp->verticeDeDestino == 0){
-				tmp = tmp->prox;
-				continue;
+	int j;
+	for(i=1; i<=grafo->numVertices; i++){
+		for(j=1; j<=grafo->numVertices; j++){
+			Aresta *aresta = selectAresta(i, j, grafo);
+			if(!(aresta == NULL)){
+				printf("%d %d %d\n", i, aresta->verticeDeDestino, aresta->peso);
 			}
-			printf("Vértice %d | Aresta (%d, %d) | Peso: %d\n", i, i, tmp->verticeDeDestino, tmp->peso);
-			tmp = tmp->prox;
 		}
 	}
 }
-
 
 bool insereAresta(int v1, int v2, Peso peso, Grafo *grafo){
 	if(grafo == NULL){
@@ -70,20 +111,21 @@ bool insereAresta(int v1, int v2, Peso peso, Grafo *grafo){
 	}
 	
 	if(grafo->listaAdj[v1]->verticeDeDestino == 0){
-		printf("Insere: verticeDeDestino == 0 para %d-%d com peso %d\n", v1, v2, peso);
+		//printf("Insere: verticeDeDestino == 0 para %d-%d com peso %d\n", v1, v2, peso);
 		grafo->listaAdj[v1]->verticeDeDestino = v2;
 		grafo->listaAdj[v1]->peso = peso;
 		grafo->listaAdj[v1]->prox = NULL;
+		grafo->numArestas++;
 	}else{
 		Aresta *novaAresta = malloc(sizeof(Aresta));
 		novaAresta->verticeDeDestino = v2;
 		novaAresta->peso = peso;
 		novaAresta->prox = grafo->listaAdj[v1];
-		
 		grafo->listaAdj[v1] = novaAresta;
+		grafo->numArestas++;
 		
 		if(grafo->listaAdj[v1]->prox == NULL){
-		printf("Insere: Deu ruim --> grafo->listaAdj[i]->prox == NULL");
+		//printf("Insere: Deu ruim --> grafo->listaAdj[i]->prox == NULL");
 		}
 	}
 	if(grafo->listaAdj[v1] == NULL){
@@ -92,15 +134,21 @@ bool insereAresta(int v1, int v2, Peso peso, Grafo *grafo){
 	}
 	
 	
-	printf("Aresta (%d,%d) com peso %d inserida com sucesso\n", v1, v2, peso);
+	//printf("Aresta (%d,%d) com peso %d inserida com sucesso\n", v1, v2, peso);
 	return 1;
 }
 
-
 bool existeAresta(int v1, int v2, Grafo *grafo){
 
+	Aresta *aresta = selectAresta(v1, v2, grafo);
+	if(aresta){
+		return 1;
+	}
+	return 0;
+
+	/*
 	Aresta *tmp = grafo->listaAdj[v1];
-		
+	
 	while(!(tmp == NULL)){
 		if(tmp->verticeDeDestino == v2){
 			printf("A aresta (%d,%d) existe\n", v1, v2);
@@ -110,42 +158,27 @@ bool existeAresta(int v1, int v2, Grafo *grafo){
 	}
 	//printf("A aresta (%d,%d) não existe\n", v1, v2);
 	return 0;
+	*/
 }
-
 
 bool removeAresta(int v1, int v2, Peso *peso, Grafo *grafo){
-	if(grafo == NULL){
-		printf("Deu ruim na remoção da aresta %d-%d de peso %d\n", v1, v2, *peso);
-		printf("Seu grafo foi inicializado?\n");
-		return 0;
-	}
-	if(!existeAresta(v1, v2, grafo)){
-		//printf("A aresta (%d,%d) não pode ser removida - A aresta não existe\n", v1, v2);
-		return 0;
-		
-	}else{
-		Aresta *tmp = grafo->listaAdj[v1];
-		Aresta *tmp2 = NULL;
-		
-		while(!(tmp == NULL)){
-			if(tmp->verticeDeDestino == v2){
-				*peso = tmp->peso;
-				if(tmp2){
-					tmp2->prox = tmp->prox;
-				}
-				free(tmp);
-				printf("A aresta (%d,%d) foi removida com sucesso\n", v1, v2);
-				return 1;
-				
-			}
-			tmp2 = tmp;
-			tmp = tmp->prox;
+	Aresta *anterior = malloc(sizeof(Aresta));
+	Aresta *aresta = selectArestaComAnterior(v1, v2, anterior, grafo);
+	if(aresta){
+		*peso = aresta->peso;
+		if(anterior->verticeDeDestino == 0){
+			anterior->prox = NULL;
+		}else{
+			anterior->prox = aresta->prox;
 		}
-		printf("A aresta (%d,%d) não foi removida\n", v1, v2);
-		return 0;
+		free(aresta);
+		printf("A aresta (%d,%d) foi removida com sucesso\n", v1, v2);
+		grafo->numArestas--;
+		return 1;
 	}
+	//printf("A aresta (%d,%d) não existe\n", v1, v2);
+	return 0;
 }
-
 
 bool listaAdjVazia(int v, Grafo *grafo){
 	if(grafo->listaAdj[v]->verticeDeDestino == 0){
@@ -157,19 +190,63 @@ bool listaAdjVazia(int v, Grafo *grafo){
 	}
 }
 
-
-
-
-void main(){
+Grafo *lerArquivo(char* nome){
+	FILE *file;
+	file = fopen(nome, "r");
+	
+	// # de Vértices
+	char buffer[3];
+	fscanf(file, "%s", buffer);
+	int nVertices = atoi(buffer);
+	
+	
+	// # de Arestas
+	fscanf(file, "%s", buffer);
+	int nArestas = atoi(buffer);
 	
 	Grafo *grafo = malloc(sizeof(Grafo));
-	bool x = inicializaGrafo(grafo, 10);
+	inicializaGrafo(grafo, nVertices);
 	
-	if(x){
-		printf("Yaaaay\n\n\n");
+	int i;
+	for(i=0; i<nArestas; i++){
+		// v1
+		fscanf(file, "%s", buffer);
+		int v1 = atoi(buffer);
+
+		// v2
+		fscanf(file, "%s", buffer);
+		int v2 = atoi(buffer);
+	
+		// peso
+		fscanf(file, "%s", buffer);
+		int peso = atoi(buffer);
+		
+		insereAresta(v1, v2, peso, grafo);
+	}
+		
+	fclose(file);
+	
+	return grafo;
+}
+
+void main(int argc, char **argv){
+	Grafo *grafo;
+	if(argc >= 2){
+		grafo = lerArquivo(argv[1]);
 	}
 	
+	// Task 1 - Imprimir grafo de forma identica a entrada
+	if(grafo){
+		imprimeGrafo(grafo);
+	}
 	
+	// Task 2 - 
+	
+	
+	/*
+	Grafo *grafo = malloc(sizeof(Grafo));
+	inicializaGrafo(grafo, 7);
+
 	insereAresta(1, 2, 1, grafo);
 	insereAresta(1, 3, 2, grafo);
 	insereAresta(2, 4, 3, grafo);
@@ -182,28 +259,44 @@ void main(){
 	
 	printf("\n\n\n");
 	
-	imprimeGrafo(grafo, 10);
+	imprimeGrafo(grafo);
 	
 	printf("\n\n\n");
 
-	Peso *peso = malloc(sizeof(Peso));
+	
+	*/
+	
+	Peso *peso = malloc(sizeof(Peso));	
 	int i;
 	int j;
-	/*
 	for(i=1; i<=10; i++){
 		for(j=1; j<=10; j++){
 			*peso = -1;
 			bool x = removeAresta(i, j, peso, grafo);
 			if(x){
 				printf("O peso da aresta (%d,%d) é %d\n", i, j, *peso);
+				imprimeGrafo(grafo);
+				
 			}
 		}
 	}
-	*/
 	
+	insereAresta(1, 2, 1, grafo);
+	insereAresta(1, 3, 2, grafo);
+	insereAresta(2, 4, 3, grafo);
+	insereAresta(3, 4, 4, grafo);
+	insereAresta(4, 5, 5, grafo);
+	insereAresta(4, 6, 6, grafo);
+	insereAresta(5, 7, 7, grafo);
+	insereAresta(6, 7, 8, grafo);
+	
+	imprimeGrafo(grafo);
+	
+	/*
 	for(i=1; i<=10; i++){
 		listaAdjVazia(i, grafo);
 	}
+	*/
 	
 
 }
