@@ -98,7 +98,52 @@ bool insereAresta(int v1, int v2, Peso peso, Grafo *grafo){
 
 
 bool existeAresta(int v1, int v2, Grafo *grafo){
-	
+
+	Aresta *tmp = grafo->listaAdj[v1];
+		
+	while(!(tmp == NULL)){
+		if(tmp->verticeDeDestino == v2){
+			printf("A aresta (%d,%d) existe\n", v1, v2);
+			return 1;
+		}
+		tmp = tmp->prox;
+	}
+	//printf("A aresta (%d,%d) não existe\n", v1, v2);
+	return 0;
+}
+
+
+bool removeAresta(int v1, int v2, Peso *peso, Grafo *grafo){
+	if(grafo == NULL){
+		printf("Deu ruim na remoção da aresta %d-%d de peso %d\n", v1, v2, *peso);
+		printf("Seu grafo foi inicializado?\n");
+		return 0;
+	}
+	if(!existeAresta(v1, v2, grafo)){
+		//printf("A aresta (%d,%d) não pode ser removida - A aresta não existe\n", v1, v2);
+		return 0;
+		
+	}else{
+		Aresta *tmp = grafo->listaAdj[v1];
+		Aresta *tmp2 = NULL;
+		
+		while(!(tmp == NULL)){
+			if(tmp->verticeDeDestino == v2){
+				*peso = tmp->peso;
+				if(tmp2){
+					tmp2->prox = tmp->prox;
+				}
+				free(tmp);
+				printf("A aresta (%d,%d) foi removida com sucesso\n", v1, v2);
+				return 1;
+				
+			}
+			tmp2 = tmp;
+			tmp = tmp->prox;
+		}
+		printf("A aresta (%d,%d) não foi removida\n", v1, v2);
+		return 0;
+	}
 }
 
 void main(){
@@ -112,16 +157,40 @@ void main(){
 	
 	
 	insereAresta(1, 2, 1, grafo);
-	insereAresta(1, 3, 1, grafo);
-	insereAresta(2, 4, 1, grafo);
-	insereAresta(3, 4, 1, grafo);
-	insereAresta(4, 5, 1, grafo);
-	insereAresta(4, 6, 1, grafo);
-	insereAresta(5, 7, 1, grafo);
-	insereAresta(6, 7, 1, grafo);
+	insereAresta(1, 3, 2, grafo);
+	insereAresta(2, 4, 3, grafo);
+	insereAresta(3, 4, 4, grafo);
+	insereAresta(4, 5, 5, grafo);
+	insereAresta(4, 6, 6, grafo);
+	insereAresta(5, 7, 7, grafo);
+	insereAresta(6, 7, 8, grafo);
+
 	
 	printf("\n\n\n");
 	
 	imprimeGrafo(grafo, 10);
+	
+	printf("\n\n\n");
+
+	Peso *peso = malloc(sizeof(Peso));
+	int i;
+	int j;
+	for(i=1; i<=10; i++){
+		for(j=1; j<=10; j++){
+			*peso = -1;
+			bool x = removeAresta(i, j, peso, grafo);
+			if(x){
+				printf("O peso da aresta (%d,%d) é %d\n", i, j, *peso);
+			}
+		}
+	}
+	
+	
+	for(i=1; i<=10; i++){
+		for(j=1; j<=10; j++){
+			existeAresta(i, j, grafo);
+		}
+	}
+	
 
 }
