@@ -146,6 +146,20 @@ bool removeAresta(int v1, int v2, Peso *peso, Grafo *grafo){
 	}
 }
 
+
+bool listaAdjVazia(int v, Grafo *grafo){
+	if(grafo->listaAdj[v]->verticeDeDestino == 0){
+		printf("listaAdjVazia(%d) está vazia\n", v);
+		return 1;
+	}else{
+		printf("listaAdjVazia(%d) não está vazia\n", v);
+		return 0;
+	}
+}
+
+
+
+
 void main(){
 	
 	Grafo *grafo = malloc(sizeof(Grafo));
@@ -175,6 +189,7 @@ void main(){
 	Peso *peso = malloc(sizeof(Peso));
 	int i;
 	int j;
+	/*
 	for(i=1; i<=10; i++){
 		for(j=1; j<=10; j++){
 			*peso = -1;
@@ -184,12 +199,10 @@ void main(){
 			}
 		}
 	}
-	
+	*/
 	
 	for(i=1; i<=10; i++){
-		for(j=1; j<=10; j++){
-			existeAresta(i, j, grafo);
-		}
+		listaAdjVazia(i, grafo);
 	}
 	
 
