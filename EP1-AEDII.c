@@ -18,6 +18,8 @@ typedef struct {
 	int numArestas;	
 } Grafo;
 
+// -------------------- Implementação do grafo -----------------------------
+
 Aresta* selectArestaComAnterior(int v1, int v2, Aresta *anterior, Grafo* grafo){
 	if(grafo == NULL){
 		printf("SelectComAnterior: Deu ruim ao tentar para (%d,%d)\n", v1, v2);
@@ -101,6 +103,7 @@ void imprimeGrafo(Grafo* grafo){
 			}
 		}
 	}
+	printf("\n");
 }
 
 bool insereAresta(int v1, int v2, Peso peso, Grafo *grafo){
@@ -229,11 +232,12 @@ Grafo *lerArquivo(char* nome){
 	return grafo;
 }
 
+// -------------------- Implementação da Fila -----------------------------
 
 typedef struct No{
 	int valor;
-	No *anterior;
-	No *prox;
+	struct No *anterior;
+	struct No *prox;
 }No;
 
 typedef struct Fila{
@@ -269,13 +273,20 @@ int filaVazia(Fila *fila){
 int inserirNaFila(int elemento, Fila *fila){
 	if(filaChecaInicializacao){
 		No *novoNo = (No *) malloc(sizeof(No));
+		if(!novoNo){
+			printf("inserirNaFila: Não foi possivel alocar memória para o novoNó\n");
+			return -2;
+		}
 		novoNo->valor = elemento;
 		novoNo->prox = fila->fim;
-		fila->fim->anterior = novoNo;
 		novoNo->anterior = NULL;
-		fila->fim = novoNo;
-		if(filaVazia(fila)){
+		
+		if(filaVazia(fila) == 1){
 			fila->inicio = novoNo;
+			fila->fim = novoNo;
+		}else{
+		fila->fim->anterior = novoNo;
+		fila->fim = novoNo;	
 		}
 		fila->nElementos++;
 		return 1;
@@ -283,24 +294,47 @@ int inserirNaFila(int elemento, Fila *fila){
 	return -1;
 }
 
-int removerDaFila(File *fila){
+int removerDaFila(Fila *fila){
 	if(filaChecaInicializacao){
 		if(filaVazia(fila) == 0){
-			No *no = fila->inicio
-			fila->inicio = fila
-			fila->fim->prox;
-			
-			return fila->fim->valor;
+			int valor = fila->inicio->valor;
+			fila->inicio = fila->inicio->anterior;
+			if(fila->inicio){
+				fila->inicio->prox->anterior = NULL;
+				free(fila->inicio->prox);
+				fila->inicio->prox = NULL;
+			}else{
+				free(fila->fim);
+				fila->fim = NULL;
+			}
+			fila->nElementos--;
+			return valor;
 		}
+		printf("removerDaFila: Não foi possível remover da fila - fila vazia\n");
+		return -3;
 	}
+	return -1;
 }
 
-void mostraFila(){
-	
+void mostraFila(Fila *fila){
+	if(filaChecaInicializacao){
+		//printf("filaVaria(fila)=%d\n", filaVazia(fila));
+		if(filaVazia(fila) == 0){
+			No *no = fila->inicio;
+			printf("nElementos: %d | ", fila->nElementos);
+			printf("Conteúdo da fila:");
+			while(no){
+				printf(" %d", no->valor);
+				no = no->anterior;
+			}
+			printf("\n");
+			return;
+		}
+		printf("mostraFila: A fila está vazia\n");
+		return;
+	}
+	return;
 }
-
-
-
 
 
 
@@ -322,6 +356,23 @@ void main(int argc, char **argv){
 	if(grafo){
 		imprimeGrafo(grafo);
 	}
+	
+	/*
+	Fila *fila = (Fila *) malloc(sizeof(Fila));
+	inicializaFila(fila);
+	mostraFila(fila);
+	int i;
+	for(i=0; i<10; i++){
+		inserirNaFila(i, fila);
+		mostraFila(fila);
+	}
+	
+	int nElementos = fila->nElementos;
+	for(i=0; i<nElementos; i++){
+		printf("%d\n", removerDaFila(fila));
+		mostraFila(fila);
+	}
+	*/
 	
 	// Task 2 - 
 	
