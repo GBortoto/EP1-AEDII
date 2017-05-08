@@ -229,6 +229,89 @@ Grafo *lerArquivo(char* nome){
 	return grafo;
 }
 
+
+typedef struct No{
+	int valor;
+	No *anterior;
+	No *prox;
+}No;
+
+typedef struct Fila{
+	No *inicio;
+	No *fim;
+	int nElementos;
+}Fila;
+
+bool inicializaFila(Fila *fila){
+	fila->inicio = NULL;
+	fila->fim = NULL;
+	fila->nElementos = 0;	
+}
+
+bool filaChecaInicializacao(Fila *fila){
+	if(fila){
+		return 1;
+	}
+	printf("Essa fila não está inicializada\n");
+	return 0;
+}
+
+int filaVazia(Fila *fila){
+	if(filaChecaInicializacao){
+		if(fila->nElementos == 0){
+			return 1;
+		}
+		return 0;
+	}
+	return -1;
+}
+
+int inserirNaFila(int elemento, Fila *fila){
+	if(filaChecaInicializacao){
+		No *novoNo = (No *) malloc(sizeof(No));
+		novoNo->valor = elemento;
+		novoNo->prox = fila->fim;
+		fila->fim->anterior = novoNo;
+		novoNo->anterior = NULL;
+		fila->fim = novoNo;
+		if(filaVazia(fila)){
+			fila->inicio = novoNo;
+		}
+		fila->nElementos++;
+		return 1;
+	}
+	return -1;
+}
+
+int removerDaFila(File *fila){
+	if(filaChecaInicializacao){
+		if(filaVazia(fila) == 0){
+			No *no = fila->inicio
+			fila->inicio = fila
+			fila->fim->prox;
+			
+			return fila->fim->valor;
+		}
+	}
+}
+
+void mostraFila(){
+	
+}
+
+
+
+
+
+
+void leituraPorBFS(){
+	
+}
+
+
+
+
+
 void main(int argc, char **argv){
 	Grafo *grafo;
 	if(argc >= 2){
@@ -265,7 +348,7 @@ void main(int argc, char **argv){
 
 	
 	*/
-	
+	/*
 	Peso *peso = malloc(sizeof(Peso));	
 	int i;
 	int j;
@@ -280,7 +363,9 @@ void main(int argc, char **argv){
 			}
 		}
 	}
+	*/
 	
+	/*
 	insereAresta(1, 2, 1, grafo);
 	insereAresta(1, 3, 2, grafo);
 	insereAresta(2, 4, 3, grafo);
@@ -291,6 +376,7 @@ void main(int argc, char **argv){
 	insereAresta(6, 7, 8, grafo);
 	
 	imprimeGrafo(grafo);
+	*/
 	
 	/*
 	for(i=1; i<=10; i++){
