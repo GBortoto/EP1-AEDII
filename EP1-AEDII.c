@@ -338,7 +338,31 @@ void mostraFila(Fila *fila){
 
 
 
-void leituraPorBFS(){
+void leituraPorBFS(Grafo *grafo){
+	int nV = grafo->nVertices;
+	// No array cor:
+	// 0 = branco
+	// 1 = cinza
+	// 2 = preto
+	int *cor = (int *) malloc(sizeof(int)*nV);
+	int *antecessor = (int *) malloc(sizeof(int)*nV);
+	int *distancia = (int *) malloc(sizeof(int)*nV);
+	int i;
+	for(i=0; i<nV; i++){
+		cor[i] = 0;
+		antecessor[i] = -1;
+		// Distancia = Infinito
+		distancia[i] = NULL;
+	}
+	for(i=0; i<nV; i++){
+		if(cor[i] == 0){
+			visitaLargura(i, grafo, cor, antecessor, distancia);
+		}
+	}
+	
+}
+
+void visitaLargura(int vertice, Grafo *grafo, int *cor, int *antecessor, int *distancia){
 	
 }
 
