@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 typedef int Peso;
 
@@ -337,9 +338,24 @@ void mostraFila(Fila *fila){
 }
 
 
+void visitaLargura(int vertice, Grafo *grafo, int *cor, int *antecessor, int *distancia){
+	cor[vertice] = 1;
+	distancia[vertice] = 0;
+	Fila *fila = (Fila *) malloc(sizeof(Fila));
+	inicializaFila(fila);
+	inserirNaFila(vertice, fila);
+	while(!(filaVazia == 1)){
+		int w = removerDaFila(fila);
+		if(w >= 0){
+			for(){
+				
+			}
+		}
+	}
+}
 
 void leituraPorBFS(Grafo *grafo){
-	int nV = grafo->nVertices;
+	int nV = grafo->numVertices;
 	// No array cor:
 	// 0 = branco
 	// 1 = cinza
@@ -352,7 +368,7 @@ void leituraPorBFS(Grafo *grafo){
 		cor[i] = 0;
 		antecessor[i] = -1;
 		// Distancia = Infinito
-		distancia[i] = NULL;
+		distancia[i] = INFINITY;
 	}
 	for(i=0; i<nV; i++){
 		if(cor[i] == 0){
@@ -362,9 +378,6 @@ void leituraPorBFS(Grafo *grafo){
 	
 }
 
-void visitaLargura(int vertice, Grafo *grafo, int *cor, int *antecessor, int *distancia){
-	
-}
 
 
 
