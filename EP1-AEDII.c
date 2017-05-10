@@ -23,7 +23,7 @@ typedef struct {
 
 Aresta* selectArestaComAnterior(int v1, int v2, Aresta *anterior, Grafo* grafo){
 	if(grafo == NULL){
-		printf("SelectComAnterior: Deu ruim ao tentar para (%d,%d)\n", v1, v2);
+		printf("SelectArestaComAnterior: Deu ruim ao tentar para (%d,%d)\n", v1, v2);
 		printf("Seu grafo foi inicializado?\n");
 		return NULL;
 	}
@@ -93,6 +93,12 @@ bool inicializaGrafo(Grafo *grafo, int nV){
 }
 
 void imprimeGrafo(Grafo* grafo){
+	if(grafo == NULL){
+		printf("Imprime: Deu ruim ao imprimir o grafo\n");
+		printf("Seu grafo foi inicializado?\n");
+		return;
+	}
+	
 	printf("%d %d\n", grafo->numVertices, grafo->numArestas);
 	int i;
 	int j;
@@ -131,6 +137,7 @@ bool insereAresta(int v1, int v2, Peso peso, Grafo *grafo){
 		if(grafo->listaAdj[v1]->prox == NULL){
 		//printf("Insere: Deu ruim --> grafo->listaAdj[i]->prox == NULL");
 		}
+
 	}
 	if(grafo->listaAdj[v1] == NULL){
 		printf("Insere: Deu ruim --> grafo->listaAdj[v1] == NULL\n");
@@ -143,7 +150,11 @@ bool insereAresta(int v1, int v2, Peso peso, Grafo *grafo){
 }
 
 bool existeAresta(int v1, int v2, Grafo *grafo){
-
+	if(grafo == NULL){
+		printf("existeAresta: Deu ruim ao tentar para (%d,%d)\n", v1, v2);
+		printf("Seu grafo foi inicializado?\n");
+		return NULL;
+	}
 	Aresta *aresta = selectAresta(v1, v2, grafo);
 	if(aresta){
 		return 1;
@@ -166,6 +177,12 @@ bool existeAresta(int v1, int v2, Grafo *grafo){
 }
 
 bool removeAresta(int v1, int v2, Peso *peso, Grafo *grafo){
+	if(grafo == NULL){
+		printf("removeAresta: Deu ruim ao tentar para (%d,%d)\n", v1, v2);
+		printf("Seu grafo foi inicializado?\n");
+		return NULL;
+	}
+
 	Aresta *anterior = malloc(sizeof(Aresta));
 	Aresta *aresta = selectArestaComAnterior(v1, v2, anterior, grafo);
 	if(aresta){
@@ -185,6 +202,12 @@ bool removeAresta(int v1, int v2, Peso *peso, Grafo *grafo){
 }
 
 bool listaAdjVazia(int v, Grafo *grafo){
+	if(grafo == NULL){
+		printf("listaAdjVazia: Deu ruim ao tentar para o vértice %d\n", v);
+		printf("Seu grafo foi inicializado?\n");
+		return NULL;
+	}
+	
 	if(grafo->listaAdj[v]->verticeDeDestino == 0){
 		printf("listaAdjVazia(%d) está vazia\n", v);
 		return 1;
@@ -193,6 +216,41 @@ bool listaAdjVazia(int v, Grafo *grafo){
 		return 0;
 	}
 }
+
+int tamanhoListaAdj(int vertice, Grafo* grafo){
+	if(grafo == NULL){
+		printf("tamanhoListaAdj: Deu ruim ao tentar para %d\n", vertice);
+		printf("Seu grafo foi inicializado?\n");
+		return;
+	}
+	
+	Aresta *tmp = grafo->listaAdj[vertice];
+	int contador = 0;
+	while(tmp){
+		contador++;
+		tmp = tmp->prox;
+	}
+	return contador;
+}
+
+bool getListaAdj(int vertice, int *valores, Grafo* grafo){
+	if(grafo == NULL){
+		printf("getListaAdj: Deu ruim ao tentar para %d\n", vertice);
+		printf("Seu grafo foi inicializado?\n");
+		return 0;
+	}
+	
+	Aresta* tmp = grafo->listaAdj[vertice];
+	int i = 0;
+	while(tmp){
+		valores[i] = tmp->verticeDeDestino;
+		i++;
+		tmp = tmp->prox;
+	}
+	return 1;
+}
+
+
 
 Grafo *lerArquivo(char* nome){
 	FILE *file;
@@ -344,17 +402,58 @@ void visitaLargura(int vertice, Grafo *grafo, int *cor, int *antecessor, int *di
 	Fila *fila = (Fila *) malloc(sizeof(Fila));
 	inicializaFila(fila);
 	inserirNaFila(vertice, fila);
-	while(!(filaVazia == 1)){
+	while(!(filaVazia(fila) == 1)){
 		int w = removerDaFila(fila);
+		printf("%d ", w);
 		if(w >= 0){
-			for(){
-				
+			int tamanho = tamanhoListaAdj(vertice, grafo);
+			int *valores = (int *) malloc(sizeof(int) * tamanho);
+			getListaAdj(w, valores, grafo);
+					
+			int i;
+			for(i=0; i < tamanho; i++){
+				int u = valores[i];
+				if(cor[u] == 0){
+					cor[u] = 1;
+					antecessor[u] = w;
+					distancia[u] = distancia[w] + 1;
+					inserirNaFila(u, fila);
+				}
 			}
+			cor[w] = 2;
+		}else{
+			printf("visitaLargura: Deu ruim - w >= 0\n");
+			return;
 		}
 	}
 }
 
-void leituraPorBFS(Grafo *grafo){
+void leituraPorBFS(Grafo *grafo, int *cor, int *antecessor, int *distancia){
+	int nV = grafo->numVertices;
+	int i;
+	for(i=1; i<=nV; i++){
+		cor[i] = 0;
+		antecessor[i] = -1;
+		// Distancia = Infinito
+		distancia[i] = INFINITY;
+	}
+	printf("BFS:\n");
+	for(i=1; i<=nV; i++){
+		if(cor[i] == 0){
+			visitaLargura(i, grafo, cor, antecessor, distancia);
+		}
+	}
+	printf("\n\n");
+}
+
+void printaFamilia(int valor, int *antecessor){
+	if(antecessor[valor] > 0){
+		printaFamilia(antecessor[valor], antecessor);
+	}
+	printf("%d ", valor);
+}
+
+void printLeituraPorBFS(Grafo *grafo){
 	int nV = grafo->numVertices;
 	// No array cor:
 	// 0 = branco
@@ -363,23 +462,87 @@ void leituraPorBFS(Grafo *grafo){
 	int *cor = (int *) malloc(sizeof(int)*nV);
 	int *antecessor = (int *) malloc(sizeof(int)*nV);
 	int *distancia = (int *) malloc(sizeof(int)*nV);
-	int i;
-	for(i=0; i<nV; i++){
-		cor[i] = 0;
-		antecessor[i] = -1;
-		// Distancia = Infinito
-		distancia[i] = INFINITY;
-	}
-	for(i=0; i<nV; i++){
-		if(cor[i] == 0){
-			visitaLargura(i, grafo, cor, antecessor, distancia);
-		}
-	}
 	
+	leituraPorBFS(grafo, cor, antecessor, distancia);
+
+	// BFS Paths:
+	printf("BFS Paths:\n");
+	int i;
+	for(i=1; i<=nV; i++){
+		printf("%d ", antecessor[i]);
+		//printaFamilia(i, antecessor);
+		//printf("\n");
+	}
+	printf("\n");
 }
 
 
+void visitaBP(int v, Grafo *grafo, int tempo, int *cor, int *tdesc, int *tterm, int *antecessor){
+	int nV = grafo->numVertices;
+	cor[v] = 1;
+	tdesc[v] = ++tempo;
+	int i;
+	printf("%d ", v);
+	int tamanho = tamanhoListaAdj(v, grafo);
+	int *valores = (int *) malloc(sizeof(int) * tamanho);
+	getListaAdj(v, valores, grafo);
+	
+	for (i=0; i<tamanho; i++){
+		printf("valores[i]: %d\n", valores[i]);
+	}
+	for(i=0; i<tamanho; i++){
+		int u = valores[i];
+		if(cor[u] == 0){
+			antecessor[u] = v;
+			visitaBP(u, grafo, tempo, cor, tdesc, tterm, antecessor);
+		}
+	}
+	tterm[v] = ++tempo;
+	cor[v] = 2;
+}
 
+void leituraPorDFS(Grafo *grafo, int *cor, int *tdesc, int *tterm, int *antecessor){
+	int nV = grafo->numVertices;
+	int tempo = 0;
+	int i;
+	for(i=1; i<=nV; i++){
+		cor[i] = 0;
+		tdesc[i] = 0;
+		tterm[i] = 0;
+		antecessor[i] = -1;
+	}
+	printf("DFS:\n");
+	for(i=1; i<=nV; i++){
+		if(cor[i] == 0){
+			visitaBP(i, grafo, tempo, cor, tdesc, tterm, antecessor);
+		}
+	}
+	printf("\n\n");
+}
+
+void printLeituraPorDFS(Grafo *grafo){
+	int nV = grafo->numVertices;
+	// No array cor:
+	// 0 = branco
+	// 1 = cinza
+	// 2 = preto
+	int *cor = (int *) malloc(sizeof(int)*nV);
+	int *tdesc = (int *) malloc(sizeof(int)*nV);
+	int *tterm = (int *) malloc(sizeof(int)*nV);
+	int *antecessor = (int *) malloc(sizeof(int)*nV);
+	
+	leituraPorDFS(grafo, cor, tdesc, tterm, antecessor);
+
+	// BFS Paths:
+	printf("DFS Paths:\n");
+	int i;
+	for(i=1; i<=nV; i++){
+		printf("%d ", antecessor[i]);
+		//printaFamilia(i, antecessor);
+		//printf("\n");
+	}
+	printf("\n");
+}
 
 
 
@@ -393,6 +556,9 @@ void main(int argc, char **argv){
 	if(grafo){
 		imprimeGrafo(grafo);
 	}
+	
+	printLeituraPorBFS(grafo);
+	//printLeituraPorDFS(grafo);
 	
 	/*
 	Fila *fila = (Fila *) malloc(sizeof(Fila));
